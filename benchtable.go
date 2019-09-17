@@ -1,15 +1,14 @@
 package main
 
 import (
-	"fmt"
-	"math"
-	"html/template"
-	//"io/ioutil"
 	"database/sql"
+	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"html/template"
 	"log"
+	"math"
 	"net/http"
-	//"regexp"
+	"strings"
 )
 
 var templates = template.Must(template.ParseFiles("index.html"))
@@ -32,32 +31,10 @@ func get_revisions(db *sql.DB) (vec []int) {
 
 type ComparisonCSB struct {
 	Config_file string
-	Time_a      float64
-	Time_b      float64
-	Memory_a    float64
-	Memory_b    float64
-}
-
-func to_rel_change_string(a float64, b float64) string {
-	rel_change := b/a - 1.0
-	if math.IsNaN(rel_change) || rel_change == -1.0 {
-		return "?"
-	} else if rel_change > 0.0 {
-		return fmt.Sprintf("+%.1f%%", rel_change * 100)
-	} else {
-		return fmt.Sprintf("%.1f%%", rel_change * 100)
-	}
-}
-
-func rel_change_to_color_string(a float64, b float64) string {
-	rel_change := b/a - 1.0
-	if math.IsNaN(rel_change) || rel_change == -1.0 || rel_change > 0.05 {
-		return "#f00"
-	} else if rel_change < -0.05 {
-		return "#0a0"
-	} else {
-		return "#000"
-	}
+	TimeA       float64
+	TimeB       float64
+	MemoryA     float64
+	MemoryB     float64
 }
 
 func comparison_csb(db *sql.DB, r1 int, r2 int) (res []ComparisonCSB) {
@@ -77,12 +54,12 @@ func comparison_csb(db *sql.DB, r1 int, r2 int) (res []ComparisonCSB) {
 	}
 	for rows.Next() {
 		var row ComparisonCSB
-		err = rows.Scan(&row.Config_file, &row.Time_a, &row.Time_b, &row.Memory_a, &row.Memory_b)
+		err = rows.Scan(&row.Config_file, &row.TimeA, &row.TimeB, &row.MemoryA, &row.MemoryB)
 		if err != nil {
 			log.Fatal(err)
 		}
+		row.Config_file = strings.Replace(row.Config_file, `D:\Jenkins\checkouts\trunk\QA_new\testcases\`, "", 1)
 		res = append(res, row)
-		//fmt.Println(row.config_file, row.time_a, row.time_b, row.memory_a, row.memory_b)
 	}
 	err = rows.Err()
 	if err != nil {
@@ -109,12 +86,6 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}
 	revisions := get_revisions(db)
 	csb_rows := comparison_csb(db, revision_low, revision_high)
-	/*for _, r := range get_revisions(db) {
-		fmt.Fprintf(w, "%d<br>", r)
-	}
-	for _, row := range comparison_csb(db, 897000, 897500) {
-		fmt.Fprintf(w, "%s %f %f %f %f", row.config_file, row.time_a, row.time_b, row.memory_a, row.memory_b)
-	}*/
 	p := IndexPage{
 		Title:         "CutSim benchmarks",
 		Revision_low:  revision_low,
@@ -127,6 +98,28 @@ func index(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func to_rel_change_string(a float64, b float64) string {
+	rel_change := b/a - 1.0
+	if math.IsNaN(rel_change) || rel_change == -1.0 {
+		return "?"
+	} else if rel_change > 0.0 {
+		return fmt.Sprintf("+%.1f%%", rel_change*100)
+	} else {
+		return fmt.Sprintf("%.1f%%", rel_change*100)
+	}
+}
+
+func rel_change_to_color_string(a float64, b float64) string {
+	rel_change := b/a - 1.0
+	if math.IsNaN(rel_change) || rel_change == -1.0 || rel_change > 0.05 {
+		return "#f00"
+	} else if rel_change < -0.05 {
+		return "#0a0"
+	} else {
+		return "#000"
 	}
 }
 

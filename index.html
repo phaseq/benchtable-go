@@ -239,17 +239,17 @@
 		window.onload = function () {
 			for (let element of document.querySelectorAll(".toggle-table")) {
 				let name = element.parentElement.getAttribute("data-js-name");
-				let in_body = [];
+				let inBody = [];
 				let next = element.parentElement.parentElement.nextElementSibling;
 				while (next && next.getAttribute("data-field-start") !== "true") {
-					in_body.push(next);
+					inBody.push(next);
 					next = next.nextElementSibling;
 				}
-				for (let detail of in_body) {
+				for (let detail of inBody) {
 					detail.style.display = "none";
 				}
 				element.addEventListener("toggle", evt => {
-					for (let detail of in_body) {
+					for (let detail of inBody) {
 						if (element.open) {
 							detail.style.display = "";
 						} else {
@@ -273,7 +273,7 @@
 
 <body>
 	<form>
-	.Revision range:
+	Revision range:
 		<select name="r1">
 			{{range $r := .Revisions}}<option{{if eq $r $.Revision_low}} selected{{end}}>{{$r}}</option>{{end}}
 		</select>
@@ -307,22 +307,22 @@
 						<summary>{{$r.Config_file}}</summary>
 					</details>
 				</th>
-				<td>time: <span style="color: {{call $.ToColor $r.Time_a $r.Time_b}}">
-						{{call $.ToRelative $r.Time_a $r.Time_b}}</span>
+				<td>time: <span style="color: {{call $.ToColor $r.TimeA $r.TimeB}}">
+						{{call $.ToRelative $r.TimeA $r.TimeB}}</span>
 				</td>
-				<td>mem: <span style="color: {{call $.ToColor $r.Memory_a $r.Memory_b}}">
-						{{call $.ToRelative $r.Memory_a $r.Memory_b}}</span>
+				<td>mem: <span style="color: {{call $.ToColor $r.MemoryA $r.MemoryB}}">
+						{{call $.ToRelative $r.MemoryA $r.MemoryB}}</span>
 				</td>
 			</tr>
 			<tr style="display:none">
 				<th style="text-align: right">r{{$.Revision_low}}</th>
-				<td>{{printf "%.2f" $r.Time_a}} s</td>
-				<td>{{printf "%.0f" $r.Memory_a}} MB</td>
+				<td>{{printf "%.2f" $r.TimeA}} s</td>
+				<td>{{printf "%.0f" $r.MemoryA}} MB</td>
 			</tr>
 			<tr style="display:none">
 				<th style="text-align: right">r{{$.Revision_high}}</th>
-				<td>{{printf "%.2f" $r.Time_b}} s</td>
-				<td>{{printf "%.0f" $r.Memory_b}} MB</td>
+				<td>{{printf "%.2f" $r.TimeB}} s</td>
+				<td>{{printf "%.0f" $r.MemoryB}} MB</td>
 			</tr>
 			<tr style="display:none">
 				<td colspan="3" class="chart" data-chart-id="{ { test.name }}">&nbsp;</td>
