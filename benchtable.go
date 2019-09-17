@@ -30,11 +30,11 @@ func get_revisions(db *sql.DB) (vec []int) {
 }
 
 type ComparisonCSB struct {
-	Config_file string
-	TimeA       float64
-	TimeB       float64
-	MemoryA     float64
-	MemoryB     float64
+	ConfigFile string
+	TimeA      float64
+	TimeB      float64
+	MemoryA    float64
+	MemoryB    float64
 }
 
 func comparison_csb(db *sql.DB, r1 int, r2 int) (res []ComparisonCSB) {
@@ -42,7 +42,7 @@ func comparison_csb(db *sql.DB, r1 int, r2 int) (res []ComparisonCSB) {
 		"AVG(a.player_total_time), AVG(b.player_total_time), " +
 		"AVG(a.memory_peak), AVG(b.memory_peak) " +
 		"FROM processed_csb b " +
-		"LEFT JOIN processed_csb a ON a.config_file = b.config_file " +
+		"INNER JOIN processed_csb a ON a.config_file = b.config_file " +
 		"WHERE a.revision=? AND b.revision=? GROUP BY a.config_file ")
 	if err != nil {
 		log.Fatal(err)
@@ -54,11 +54,11 @@ func comparison_csb(db *sql.DB, r1 int, r2 int) (res []ComparisonCSB) {
 	}
 	for rows.Next() {
 		var row ComparisonCSB
-		err = rows.Scan(&row.Config_file, &row.TimeA, &row.TimeB, &row.MemoryA, &row.MemoryB)
+		err = rows.Scan(&row.ConfigFile, &row.TimeA, &row.TimeB, &row.MemoryA, &row.MemoryB)
 		if err != nil {
 			log.Fatal(err)
 		}
-		row.Config_file = strings.Replace(row.Config_file, `D:\Jenkins\checkouts\trunk\QA_new\testcases\`, "", 1)
+		row.ConfigFile = strings.Replace(row.ConfigFile, `D:\Jenkins\checkouts\trunk\QA_new\testcases\`, "", 1)
 		res = append(res, row)
 	}
 	err = rows.Err()
@@ -69,13 +69,13 @@ func comparison_csb(db *sql.DB, r1 int, r2 int) (res []ComparisonCSB) {
 }
 
 type IndexPage struct {
-	Title         string
-	Revision_low  int
-	Revision_high int
-	Revisions     []int
-	Csb_rows      []ComparisonCSB
-	ToRelative    func(float64, float64) string
-	ToColor       func(float64, float64) string
+	Title        string
+	RevisionLow  int
+	RevisionHigh int
+	Revisions    []int
+	CsbRows      []ComparisonCSB
+	ToRelative   func(float64, float64) string
+	ToColor      func(float64, float64) string
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
@@ -87,13 +87,13 @@ func index(w http.ResponseWriter, r *http.Request) {
 	revisions := get_revisions(db)
 	csb_rows := comparison_csb(db, revision_low, revision_high)
 	p := IndexPage{
-		Title:         "CutSim benchmarks",
-		Revision_low:  revision_low,
-		Revision_high: revision_high,
-		Revisions:     revisions,
-		Csb_rows:      csb_rows,
-		ToRelative:    to_rel_change_string,
-		ToColor:       rel_change_to_color_string}
+		Title:        "CutSim benchmarks",
+		RevisionLow:  revision_low,
+		RevisionHigh: revision_high,
+		Revisions:    revisions,
+		CsbRows:      csb_rows,
+		ToRelative:   to_rel_change_string,
+		ToColor:      rel_change_to_color_string}
 	err = templates.ExecuteTemplate(w, "index.html", p)
 	if err != nil {
 		fmt.Println(err)

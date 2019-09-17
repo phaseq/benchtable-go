@@ -214,7 +214,7 @@
 					addGraph(node, data, false);
 				}
 			};
-			xhttp.open("GET", "/api/all/" + type + "?r1={{.Revision_low}}&r2={{.Revision_high}}", true);
+			xhttp.open("GET", "/api/all/" + type + "?r1={{.RevisionLow}}&r2={{.RevisionHigh}}", true);
 			xhttp.send();
 		}
 		function loadSummaryCharts() {
@@ -275,10 +275,10 @@
 	<form>
 	Revision range:
 		<select name="r1">
-			{{range $r := .Revisions}}<option{{if eq $r $.Revision_low}} selected{{end}}>{{$r}}</option>{{end}}
+			{{range $r := .Revisions}}<option{{if eq $r $.RevisionLow}} selected{{end}}>{{$r}}</option>{{end}}
 		</select>
 		<select name="r2">
-			{{range $r := .Revisions}}<option{{if eq $r $.Revision_high}} selected{{end}}>{{$r}}</option>{{end}}
+			{{range $r := .Revisions}}<option{{if eq $r $.RevisionHigh}} selected{{end}}>{{$r}}</option>{{end}}
 		</select>
 		<!--Sort by: <select name="sort">
 			<option {% if sort == "name" %}selected{%endif%}>name</option>
@@ -295,16 +295,16 @@
 		<thead>
 			<tr>
 				<td></td>
-				<th>r{{.Revision_low}}</th>
-				<th>r{{.Revision_high}}</th>
+				<th>r{{.RevisionLow}}</th>
+				<th>r{{.RevisionHigh}}</th>
 			</tr>
 		</thead>
 		<tbody>
-			{{range $r := .Csb_rows}}
+			{{range $r := .CsbRows}}
 			<tr data-field-start="true">
-				<th data-js-name="{{$r.Config_file}}">
+				<th data-js-name="{{$r.ConfigFile}}">
 					<details class="toggle-table">
-						<summary>{{$r.Config_file}}</summary>
+						<summary>{{$r.ConfigFile}}</summary>
 					</details>
 				</th>
 				<td>time: <span style="color: {{call $.ToColor $r.TimeA $r.TimeB}}">
@@ -315,12 +315,12 @@
 				</td>
 			</tr>
 			<tr style="display:none">
-				<th style="text-align: right">r{{$.Revision_low}}</th>
+				<th style="text-align: right">r{{$.RevisionLow}}</th>
 				<td>{{printf "%.2f" $r.TimeA}} s</td>
 				<td>{{printf "%.0f" $r.MemoryA}} MB</td>
 			</tr>
 			<tr style="display:none">
-				<th style="text-align: right">r{{$.Revision_high}}</th>
+				<th style="text-align: right">r{{$.RevisionHigh}}</th>
 				<td>{{printf "%.2f" $r.TimeB}} s</td>
 				<td>{{printf "%.0f" $r.MemoryB}} MB</td>
 			</tr>
@@ -336,8 +336,8 @@
 		<thead>
 			<tr>
 				<td></td>
-				<th>r{{.Revision_low}}</th>
-				<th>r{{.Revision_high}}</th>
+				<th>r{{.RevisionLow}}</th>
+				<th>r{{.RevisionHigh}}</th>
 				<th></th>
 			</tr>
 		</thead>
@@ -358,13 +358,13 @@
 				</td>
 			</tr>
 			<tr style="display:none">
-				<th style="text-align: right">r{{.Revision_low}}:</th>
+				<th style="text-align: right">r{{.RevisionLow}}:</th>
 				<td>{ { test.cut_time0 | round(precision=2) }} s</td>
 				<td>{ { test.draw_time0 | round(precision=2) }} s</td>
 				<td>{ { test.memory0 | round(precision=0) }} MB</td>
 			</tr>
 			<tr style="display:none">
-				<th style="text-align: right">r{{.Revision_high}}:</th>
+				<th style="text-align: right">r{{.RevisionHigh}}:</th>
 				<td>{ { test.cut_time1 | round(precision=2) }} s</td>
 				<td>{ { test.draw_time1 | round(precision=2) }} s</td>
 				<td>{ { test.memory1 | round(precision=0) }} MB</td>
