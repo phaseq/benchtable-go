@@ -199,9 +199,9 @@
 			};
 			var chartId = encodeURI(chartNode.getAttribute("data-chart-id"));
 			if (chartId.includes(".csb")) {
-				xhttp.open("GET", "/api/file/csb?id=%" + chartId, true);
+				xhttp.open("GET", "/api/file/csb?id=%25" + chartId, true);
 			} else {
-				xhttp.open("GET", "/api/file/ini?id=%" + chartId, true);
+				xhttp.open("GET", "/api/file/ini?id=%25" + chartId, true);
 			}
 			xhttp.send();
 		}
@@ -273,19 +273,19 @@
 
 <body>
 	<form>
-	Revision range:
+		Revision range:
 		<select name="r1">
 			{{range $r := .Revisions}}<option{{if eq $r $.RevisionLow}} selected{{end}}>{{$r}}</option>{{end}}
 		</select>
 		<select name="r2">
 			{{range $r := .Revisions}}<option{{if eq $r $.RevisionHigh}} selected{{end}}>{{$r}}</option>{{end}}
 		</select>
-		<!--Sort by: <select name="sort">
-			<option {% if sort == "name" %}selected{%endif%}>name</option>
-			<option {% if sort == "cut time" %}selected{%endif%}>cut time</option>
-			<option {% if sort == "draw time" %}selected{%endif%}>draw time</option>
-			<option {% if sort == "memory" %}selected{%endif%}>memory</option>
-		</select>-->
+		Sort by: <select name="sort">
+			<option {{if eq .SortBy "name"}}selected{{end}}>name</option>
+			<option {{if eq .SortBy "cut time"}}selected{{end}}>cut time</option>
+			<option {{if eq .SortBy "draw time"}}selected{{end}}>draw time</option>
+			<option {{if eq .SortBy "memory"}}selected{{end}}>memory</option>
+		</select>
 		<input type="submit" value="Ok" />
 	</form>
 	<div id="summary_charts"><button onclick="loadSummaryCharts()">Load Summary Charts</button></div>
@@ -325,7 +325,7 @@
 				<td>{{printf "%.0f" $r.MemoryB}} MB</td>
 			</tr>
 			<tr style="display:none">
-				<td colspan="3" class="chart" data-chart-id="{ { test.name }}">&nbsp;</td>
+				<td colspan="3" class="chart" data-chart-id="{{$r.ConfigFile}}">&nbsp;</td>
 			</tr>
 			{{end}}
 		</tbody>
@@ -342,37 +342,39 @@
 			</tr>
 		</thead>
 		<tbody>
-			{% for test in ini_tests %}
+			{{range $r := .IniRows}}
 			<tr data-field-start="true">
-				<th data-js-name="{ { test.name }}">
+				<th data-js-name="{{$r.ConfigFile}}">
 					<details class="toggle-table">
-						<summary>{ { test.name }}</summary>
+						<summary>{{$r.ConfigFile}}</summary>
 					</details>
 				</th>
-				<td>cut: <span style="color: { { to_color(val=test.cut_time_change) }}">
-						{ { relative_change(val=test.cut_time_change) }}</span></td>
-				<td>draw: <span style="color: { { to_color(val=test.draw_time_change) }}">
-						{ { relative_change(val=test.draw_time_change) }}</span></td>
-				<td>mem: <span style="color: { { to_color(val=test.memory_change) }}">
-						{ { relative_change(val=test.memory_change) }}</span>
+				<td>cut: <span style="color: {{call $.ToColor $r.CutTimeA $r.CutTimeB}}">
+						{{call $.ToRelative $r.CutTimeA $r.CutTimeB}}</span>
+				</td>
+				<td>draw: <span style="color: {{call $.ToColor $r.DrawTimeA $r.DrawTimeB}}">
+						{{call $.ToRelative $r.DrawTimeA $r.DrawTimeB}}</span>
+				</td>
+				<td>mem: <span style="color: {{call $.ToColor $r.MemoryA $r.MemoryB}}">
+						{{call $.ToRelative $r.MemoryA $r.MemoryB}}</span>
 				</td>
 			</tr>
 			<tr style="display:none">
-				<th style="text-align: right">r{{.RevisionLow}}:</th>
-				<td>{ { test.cut_time0 | round(precision=2) }} s</td>
-				<td>{ { test.draw_time0 | round(precision=2) }} s</td>
-				<td>{ { test.memory0 | round(precision=0) }} MB</td>
+				<th style="text-align: right">r{{$.RevisionLow}}</th>
+				<td>{{printf "%.2f" $r.CutTimeA}} s</td>
+				<td>{{printf "%.2f" $r.DrawTimeA}} s</td>
+				<td>{{printf "%.0f" $r.MemoryA}} MB</td>
 			</tr>
 			<tr style="display:none">
-				<th style="text-align: right">r{{.RevisionHigh}}:</th>
-				<td>{ { test.cut_time1 | round(precision=2) }} s</td>
-				<td>{ { test.draw_time1 | round(precision=2) }} s</td>
-				<td>{ { test.memory1 | round(precision=0) }} MB</td>
+				<th style="text-align: right">r{{$.RevisionHigh}}</th>
+				<td>{{printf "%.2f" $r.CutTimeB}} s</td>
+				<td>{{printf "%.2f" $r.DrawTimeB}} s</td>
+				<td>{{printf "%.0f" $r.MemoryB}} MB</td>
 			</tr>
 			<tr style="display:none">
-				<td colspan="4" class="chart" data-chart-id="{ { test.name } }">&nbsp;</td>
+				<td colspan="4" class="chart" data-chart-id="{{$r.ConfigFile}}">&nbsp;</td>
 			</tr>
-			{% endfor %}
+			{{end}}
 		</tbody>
 	</table>
 
