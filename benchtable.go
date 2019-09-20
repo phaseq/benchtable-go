@@ -132,6 +132,10 @@ type IndexPage struct {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.Error(w, "404 file not found", http.StatusNotFound)
+		return
+	}
 	db, err := sql.Open("sqlite3", "/Users/fabian/Dev/Rust/bench/cutsim-testreport.db")
 	if err != nil {
 		log.Fatal(err)
